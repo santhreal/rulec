@@ -1,0 +1,80 @@
+[package]
+name = "rulec"
+version = "0.1.1"
+edition = "2021"
+rust-version = "1.91"
+license = "MIT OR Apache-2.0"
+description = "rulec: one-way compiler lowering detection-rule dialects (YARA today, Sigma next) onto the vyre GPU rule engine; forward integration onto the vyre substrate with optional .srg text export."
+publish = true
+
+[package.metadata.santh]
+status = "alpha"
+
+# Own workspace: stays out of the churning root/surge/vyre workspaces.
+[workspace]
+
+[dependencies]
+# The AST we lower FROM. Current line (1.17) has a public, walkable `ast` module
+# designed for external consumption (the in-tree karyx pin is the old 0.5.0; not used here).
+yara-x-parser = "=1.17.0"
+# CPU reference oracle's regex-string matcher (P1.5 swaps to vyre::scan::regex_dfa).
+# Pinned to 1.13.1 to stay resolvable against the vyre-libs path dependency,
+# whose workspace pins regex to =1.13.1.
+regex = "=1.13.1"
+# The differential ORACLE: yara-x's own Scanner is the reference YARA semantics. Optional
+# so the default build (the lowering + `.srg` emitter) stays lean; the `differential`
+# feature pulls it in for the corpus engine (`oracle` module).
+yara-x = { version = "=1.17.0", optional = true }
+
+# The REAL execution substrate (feature `vyre-engine`): the canonical local vyre tree.
+# `vyre-libs` carries the byte-mode regex frontend (`compile_regex_set`), the compiled
+# byte-NFA + its CPU parity walker (`try_reference_scan`), and the typed rule engine
+# (`RuleFormula` / `evaluate_formula`). `vyre_engine::verdict` scans + evaluates through
+# this, not the CPU mirror.
+vyre-libs = { version = "0.7", features = ["matching-regex", "rule"], default-features = false, optional = true }
+
+# GPU dispatch (feature `gpu`): the `vyre` trait crate names the `VyreBackend` seam so the
+# scan entrypoints stay backend-agnostic (any GPU/CPU backend), and `vyre-driver-wgpu`
+# supplies the concrete on-device backend (+ the parity test's `acquire()`). vyre-libs
+# already carries the GPU megakernel (`RulePipeline::scan`) under matching-nfa, which
+# `matching-regex` (enabled above) pulls in (so this only adds the backend, not the engine).
+vyre = { version = "0.7", default-features = false, optional = true }
+vyre-driver-wgpu = { version = "0.7", optional = true }
+
+[features]
+# Enables the `oracle` module: corpus-scale differential of our lowering vs yara-x.
+differential = ["dep:yara-x"]
+# Enables the `vyre_engine` module: lower -> real vyre scan (CPU parity walk) + rule engine -> verdict.
+vyre-engine = ["dep:vyre-libs"]
+# GPU execution: dispatch the same lowered RulePipeline on-device via the vyre megakernel.
+# Backend-agnostic entrypoints (`*_on`) need only `vyre`; `vyre-driver-wgpu` is the shipped backend.
+gpu = ["vyre-engine", "dep:vyre", "dep:vyre-driver-wgpu"]
+
+[dev-dependencies]
+# Curated differential fixtures (tests/differential.rs) always run against yara-x.
+yara-x = "=1.17.0"
+
+# The corpus dogfood driver needs the differential oracle; skipped unless enabled.
+[[example]]
+name = "corpus_map"
+required-features = ["differential"]
+
+[[test]]
+name = "unit"
+path = "tests/unit/unit_tests.rs"
+
+[[test]]
+name = "adversarial"
+path = "tests/adversarial/adversarial_tests.rs"
+
+[[test]]
+name = "property"
+path = "tests/property/property_tests.rs"
+
+[[test]]
+name = "gap"
+path = "tests/gap/gap_tests.rs"
+
+[[test]]
+name = "integration"
+path = "tests/integration/integration_tests.rs"

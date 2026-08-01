@@ -1,0 +1,6 @@
+[toolchain]
+# yara-x / yara-x-parser 1.17 and wasmtime 43 require rustc 1.91+, so the
+# crate cannot build on the fleet-minimum 1.85.0. Pin the newest installed
+# stable toolchain instead.
+channel = "1.97.1"
+components = ["clippy", "rustfmt"]

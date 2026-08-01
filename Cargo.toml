@@ -1,9 +1,13 @@
 [package]
 name = "rulec"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 rust-version = "1.91"
 license = "MIT OR Apache-2.0"
+homepage = "https://santh.dev"
+repository = "https://github.com/santhreal/rulec"
+keywords = ["yara", "sigma", "gpu", "vyre", "detection-rules"]
+categories = ["development-tools", "parser-implementations"]
 description = "rulec: one-way compiler lowering detection-rule dialects (YARA today, Sigma next) onto the vyre GPU rule engine; forward integration onto the vyre substrate with optional .srg text export."
 publish = true
 

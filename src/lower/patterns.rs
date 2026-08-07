@@ -322,9 +322,27 @@ fn jump_regex(start: Option<u32>, end: Option<u32>) -> String {
     let any = "[\\x00-\\xff]";
     match (start, end) {
         (Some(a), Some(b)) if a == b => format!("{any}{{{a}}}"),
-        (Some(a), Some(b)) => format!("{any}{{{a},{b}}}"),
+        (Some(a), Some(b)) => {
+            let min = a.min(b);
+            let max = a.max(b);
+            format!("{any}{{{min},{max}}}")
+        }
         (Some(a), None) => format!("{any}{{{a},}}"),
         (None, Some(b)) => format!("{any}{{0,{b}}}"),
         (None, None) => format!("{any}*"),
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_jump_regex_bounds_ordering() {
+        assert_eq!(jump_regex(Some(2), Some(5)), "[\\x00-\\xff]{2,5}");
+        assert_eq!(jump_regex(Some(5), Some(2)), "[\\x00-\\xff]{2,5}");
+        assert_eq!(jump_regex(Some(3), Some(3)), "[\\x00-\\xff]{3}");
+        assert_eq!(jump_regex(Some(4), None), "[\\x00-\\xff]{4,}");
+        assert_eq!(jump_regex(None, Some(6)), "[\\x00-\\xff]{0,6}");
+        assert_eq!(jump_regex(None, None), "[\\x00-\\xff]*");
     }
 }

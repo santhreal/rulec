@@ -1,6 +1,13 @@
 # Changelog
 
 All notable changes to `rulec` will be documented in this file.
+## [0.1.3] - 2026-08-07
+
+### Added
+- Added package `authors` metadata field (`Santh <64453045+santhreal@users.noreply.github.com>`).
+
+### Fixed
+- `jump_regex` orders start/end bounds via `min`/`max` to guarantee valid regex repetition syntax.
 
 ## [0.1.1] - 2026-07-31
 

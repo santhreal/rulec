@@ -36,15 +36,15 @@ yara-x = { version = "=1.17.0", optional = true }
 # byte-NFA + its CPU parity walker (`try_reference_scan`), and the typed rule engine
 # (`RuleFormula` / `evaluate_formula`). `vyre_engine::verdict` scans + evaluates through
 # this, not the CPU mirror.
-vyre-libs = { version = "0.7", features = ["matching-regex", "rule"], default-features = false, optional = true }
+vyre-libs = { path = "../../performance/matching/vyre/vyre-libs", version = "0.7", optional = true, default-features = false, features = ["matching-regex", "rule"] }
 
 # GPU dispatch (feature `gpu`): the `vyre` trait crate names the `VyreBackend` seam so the
 # scan entrypoints stay backend-agnostic (any GPU/CPU backend), and `vyre-driver-wgpu`
 # supplies the concrete on-device backend (+ the parity test's `acquire()`). vyre-libs
 # already carries the GPU megakernel (`RulePipeline::scan`) under matching-nfa, which
 # `matching-regex` (enabled above) pulls in (so this only adds the backend, not the engine).
-vyre = { version = "0.7", default-features = false, optional = true }
-vyre-driver-wgpu = { version = "0.7", optional = true }
+vyre = { path = "../../performance/matching/vyre/vyre-core", version = "0.7", optional = true, default-features = false }
+vyre-driver-wgpu = { path = "../../performance/matching/vyre/vyre-driver-wgpu", version = "0.7", optional = true }
 
 [features]
 # Enables the `oracle` module: corpus-scale differential of our lowering vs yara-x.

@@ -49,7 +49,9 @@ pub(crate) fn synthesize_regex_match(regex: &str, nocase: bool) -> Option<Vec<u8
 
 fn next_regex_candidate(buf: &mut [u8], alphabet: &[u8]) -> bool {
     for i in (0..buf.len()).rev() {
-        let pos = alphabet.iter().position(|&b| b == buf[i]).unwrap();
+        let Some(pos) = alphabet.iter().position(|&b| b == buf[i]) else {
+            return false;
+        };
         if pos + 1 < alphabet.len() {
             buf[i] = alphabet[pos + 1];
             for j in i + 1..buf.len() {

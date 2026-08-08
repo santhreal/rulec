@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 
 use crate::lower::lower_rule;
 use crate::{verdict, LoweredRule};
-use synth::{all_literals_buffer, all_patterns_buffer, synthesize_regex_match};
+use synth::{all_literals_buffer, all_patterns_buffer};
 
 /// One concrete divergence: our verdict disagreed with yara-x on a real rule.
 #[derive(Debug, Clone)]
@@ -283,7 +283,7 @@ fn collect_yara_files(dir: &Path, out: &mut Vec<PathBuf>, read_errors: &mut usiz
 #[cfg(all(test, feature = "differential"))]
 mod tests {
     use super::*;
-
+    use synth::synthesize_regex_match;
     const YARA_REJECTED_SRC: &str = r#"
 rule test {
     strings:

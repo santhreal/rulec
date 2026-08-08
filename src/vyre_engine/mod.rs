@@ -7,8 +7,9 @@ pub mod compiled;
 #[cfg(feature = "gpu")]
 pub use compiled::{CompiledRuleSet, ResidentSession};
 
+use vyre::scan::RulePipeline;
 use vyre_libs::rule::{evaluate_formula, RuleCondition, RuleEvaluationContext, RuleFormula};
-use vyre_libs::scan::{build_rule_pipeline_from_regex, RulePipeline};
+use vyre_libs::scan::build_rule_pipeline_from_regex;
 
 use crate::lower::{CmpOp, Cond, LoweredRule};
 
@@ -112,7 +113,6 @@ pub fn verdict_on<B: vyre::VyreBackend + ?Sized>(
     let counts = pattern_counts_on(rule, data, backend, max_matches)?;
     Ok(eval_with_counts(rule, counts, data.len()))
 }
-
 fn build_pipeline(rule: &LoweredRule, data: &[u8]) -> Result<Option<RulePipeline>, VyreEngineError> {
     if rule.patterns.is_empty() {
         return Ok(None);
@@ -122,9 +122,14 @@ fn build_pipeline(rule: &LoweredRule, data: &[u8]) -> Result<Option<RulePipeline
     let input_len = u32::try_from(data.len()).map_err(|_| {
         VyreEngineError::Scan("haystack exceeds u32 capacity; split the input".to_string())
     })?;
-    build_rule_pipeline_from_regex(&refs, "input", "hits", input_len)
-        .map(Some)
-        .map_err(|e| VyreEngineError::Compile(e.to_string()))
+    let p = build_rule_pipeline_from_regex(&refs, "input", "hits", input_len)
+        .map_err(|e| VyreEngineError::Compile(e.to_string()))?;
+    Ok(Some(RulePipeline {
+        program: p.program,
+        transition_table: p.transition_table,
+        epsilon_table: p.epsilon_table,
+        plan: p.plan,
+    }))
 }
 
 pub(crate) fn tally(pattern_ids: impl Iterator<Item = u32>, n_patterns: usize) -> Vec<u32> {

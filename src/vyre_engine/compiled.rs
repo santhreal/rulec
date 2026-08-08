@@ -1,7 +1,10 @@
 //! Combined resident scanner (feature `gpu`).
 
-use vyre_libs::rule::{evaluate_formula, RuleCondition, RuleEvaluationContext, RuleFormula};
-use vyre_libs::scan::{build_rule_pipeline_from_regex, compile_regex_set, RegexCompileError, RegexCompileError::TooManyStates, ResidentRulePipeline, RulePipeline};
+use vyre::scan::{ResidentRulePipeline, RulePipeline};
+use vyre_libs::rule::{evaluate_formula, RuleEvaluationContext, RuleFormula};
+use vyre_libs::scan::{
+    build_rule_pipeline_from_regex, compile_regex_set, RegexCompileError::TooManyStates,
+};
 
 use crate::lower::LoweredRule;
 use crate::vyre_engine::{tally, to_formula, VyreEngineError};
@@ -77,10 +80,14 @@ fn build_shard(
         None
     } else {
         let refs: Vec<&str> = patterns.iter().map(String::as_str).collect();
-        Some(
-            build_rule_pipeline_from_regex(&refs, "input", "hits", capacity)
-                .map_err(|e| VyreEngineError::Compile(e.to_string()))?,
-        )
+        let p = build_rule_pipeline_from_regex(&refs, "input", "hits", capacity)
+            .map_err(|e| VyreEngineError::Compile(e.to_string()))?;
+        Some(RulePipeline {
+            program: p.program,
+            transition_table: p.transition_table,
+            epsilon_table: p.epsilon_table,
+            plan: p.plan,
+        })
     };
     Ok(Shard { pipeline, slots, n_patterns })
 }

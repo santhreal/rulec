@@ -1,6 +1,13 @@
 # Changelog
 
 All notable changes to `rulec` will be documented in this file.
+## [0.1.4] - 2026-08-08
+
+### Fixed
+- Added `dep:vyre` to `vyre-engine` feature flag in `Cargo.toml` so `vyre::scan` parity and resident execution entrypoints compile cleanly.
+- Mapped `vyre_libs::scan::RulePipeline` build artifacts onto `vyre::scan::RulePipeline` execution wrappers in `vyre_engine` module.
+- Cleaned up unused import warning for `synthesize_regex_match` in `oracle` module.
+
 ## [0.1.3] - 2026-08-07
 
 ### Added

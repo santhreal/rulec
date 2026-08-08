@@ -1,6 +1,6 @@
 [package]
 name = "rulec"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Santh <64453045+santhreal@users.noreply.github.com>"]
 edition = "2021"
 rust-version = "1.91"
@@ -50,7 +50,7 @@ vyre-driver-wgpu = { version = "0.7", optional = true }
 # Enables the `oracle` module: corpus-scale differential of our lowering vs yara-x.
 differential = ["dep:yara-x"]
 # Enables the `vyre_engine` module: lower -> real vyre scan (CPU parity walk) + rule engine -> verdict.
-vyre-engine = ["dep:vyre-libs"]
+vyre-engine = ["dep:vyre-libs", "dep:vyre"]
 # GPU execution: dispatch the same lowered RulePipeline on-device via the vyre megakernel.
 # Backend-agnostic entrypoints (`*_on`) need only `vyre`; `vyre-driver-wgpu` is the shipped backend.
 gpu = ["vyre-engine", "dep:vyre", "dep:vyre-driver-wgpu"]
